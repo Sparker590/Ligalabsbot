@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LigaLabs — Classement Esport Brawl Stars</title>
+<style>
+  :root {
+    --gold:   #F0B232;
+    --gold2:  #FFD700;
+    --bg:     #0D0D1A;
+    --card:   #161628;
+    --card2:  #1E1E38;
+    --border: #2A2A4A;
+    --text:   #E8E8FF;
+    --sub:    #8888AA;
+    --s: #FF4444; --a: #FF8800; --b: #FFDD00;
+    --c: #44FF88; --d: #4488FF; --e: #AAAAAA;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, #0D0D1A 0%, #1a1040 50%, #0D0D1A 100%);
+    border-bottom: 2px solid var(--gold);
+    padding: 28px 40px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% -20%, rgba(240,178,50,0.15) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .logo-title { display: flex; flex-direction: column; }
+  .logo-title h1 {
+    font-size: 2.2rem;
+    font-weight: 900;
+    background: linear-gradient(90deg, var(--gold), var(--gold2), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .logo-title p { color: var(--sub); font-size: 0.9rem; letter-spacing: 1px; }
+  .bs-logo {
+    width: 64px; height: 64px;
+    background: linear-gradient(135deg, var(--gold), #ff8c00);
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem; font-weight: 900;
+    box-shadow: 0 0 30px rgba(240,178,50,0.4);
+    flex-shrink: 0;
+  }
+
+  /* ── CONTAINER ── */
+  .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+  /* ── SEASON BAR ── */
+  .season-bar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+  }
+  .season-bar span { color: var(--sub); font-size: 0.85rem; }
+  .season-bar strong { color: var(--gold); }
+
+  /* ── TEAM ROW ── */
+  .team-row {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all .2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .team-row::before {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--tier-color, var(--e));
+    border-radius: 4px 0 0 4px;
+  }
+  .team-row:hover {
+    background: var(--card2);
+    border-color: var(--gold);
+    transform: translateX(4px);
+    box-shadow: 0 4px 20px rgba(240,178,50,0.1);
+  }
+  .team-row.top1 { border-color: #FFD700; box-shadow: 0 0 20px rgba(255,215,0,0.15); }
+  .team-row.top2 { border-color: #C0C0C0; }
+  .team-row.top3 { border-color: #CD7F32; }
+
+  .rank-num {
+    font-size: 1.1rem; font-weight: 900;
+    min-width: 36px; text-align: center;
+    color: var(--sub);
+  }
+  .rank-num.medal { font-size: 1.5rem; }
+
+  .team-logo {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--card2);
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    overflow: hidden;
+  }
+  .team-logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+
+  .team-info { flex: 1; }
+  .team-info h3 { font-size: 1.05rem; font-weight: 700; }
+  .team-info p  { font-size: 0.78rem; color: var(--sub); margin-top: 2px; }
+
+  .tier-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border: 1px solid;
+  }
+  .tier-S { color: var(--s); border-color: var(--s); background: rgba(255,68,68,.1); }
+  .tier-A { color: var(--a); border-color: var(--a); background: rgba(255,136,0,.1); }
+  .tier-B { color: var(--b); border-color: var(--b); background: rgba(255,221,0,.1); }
+  .tier-C { color: var(--c); border-color: var(--c); background: rgba(68,255,136,.1); }
+  .tier-D { color: var(--d); border-color: var(--d); background: rgba(68,136,255,.1); }
+  .tier-E { color: var(--e); border-color: var(--e); background: rgba(170,170,170,.1); }
+
+  .points-display {
+    text-align: right;
+    min-width: 90px;
+  }
+  .points-display .pts {
+    font-size: 1.4rem; font-weight: 900;
+    color: var(--gold);
+  }
+  .points-display .label { font-size: 0.7rem; color: var(--sub); }
+
+  /* ── MODAL ÉQUIPE ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--gold);
+    border-radius: 20px;
+    padding: 36px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 0 60px rgba(240,178,50,0.2);
+  }
+  .modal-close {
+    position: absolute; top: 16px; right: 20px;
+    background: none; border: none; color: var(--sub);
+    font-size: 1.5rem; cursor: pointer; line-height: 1;
+  }
+  .modal-close:hover { color: var(--text); }
+
+  .modal-header {
+    display: flex; gap: 20px; align-items: center;
+    margin-bottom: 28px;
+  }
+  .modal-logo {
+    width: 80px; height: 80px;
+    border-radius: 14px;
+    object-fit: cover;
+    background: var(--card2);
+    border: 2px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.5rem; overflow: hidden; flex-shrink: 0;
+  }
+  .modal-logo img { width: 100%; height: 100%; object-fit: cover; }
+  .modal-title h2 { font-size: 1.6rem; font-weight: 900; }
+  .modal-title p  { color: var(--sub); margin-top: 4px; }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .info-card {
+    background: var(--card2);
+    border-radius: 10px;
+    padding: 14px;
+    border: 1px solid var(--border);
+  }
+  .info-card label { font-size: 0.72rem; color: var(--sub); text-transform: uppercase; letter-spacing: 1px; }
+  .info-card span  { display: block; font-weight: 700; margin-top: 4px; font-size: 1.1rem; }
+
+  .players-section h3 {
+    color: var(--gold);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+  .players-grid {
+    display: flex; flex-wrap: wrap; gap: 12px;
+  }
+  .player-card {
+    background: var(--card2);
+    border-radius: 12px;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    text-align: center;
+    min-width: 100px;
+  }
+  .player-chibi {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: var(--border);
+    margin: 0 auto 8px;
+    overflow: hidden;
+    border: 2px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+  }
+  .player-chibi img { width: 100%; height: 100%; object-fit: cover; }
+  .player-card .player-name { font-size: 0.82rem; font-weight: 700; }
+
+  /* ── LOADING ── */
+  .loading {
+    text-align: center; padding: 80px 20px;
+    color: var(--sub);
+  }
+  .spinner {
+    width: 48px; height: 48px;
+    border: 4px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── EMPTY ── */
+  .empty { text-align: center; padding: 60px; color: var(--sub); }
+  .empty .icon { font-size: 4rem; margin-bottom: 16px; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--card); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+  @media (max-width: 600px) {
+    header { padding: 20px; }
+    .logo-title h1 { font-size: 1.6rem; }
+    .team-row { padding: 12px 16px; gap: 12px; }
+    .info-grid { grid-template-columns: 1fr; }
+    .modal { padding: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bs-logo">⚡</div>
+  <div class="logo-title">
+    <h1>LigaLabs</h1>
+    <p>Fédération Esport Brawl Stars — Classement Officiel</p>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="season-bar">
+    <span>Saison en cours</span>
+    <strong id="team-count">Chargement…</strong>
+    <span id="last-update"></span>
+  </div>
+
+  <div id="leaderboard">
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Chargement du classement…</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL FICHE ÉQUIPE -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-content">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ────────────────────────────────────────────────────────
+// DONNÉES — édite teams.json ou modifie TEAMS_DATA ici
+// ────────────────────────────────────────────────────────
+
+let TEAMS_DATA = [];
+
+const TIER_ORDER = ["S","A","B","C","D","E"];
+const MEDAL = ["🥇","🥈","🥉"];
+const TIER_COLOR = {S:"#FF4444",A:"#FF8800",B:"#FFDD00",C:"#44FF88",D:"#4488FF",E:"#AAAAAA"};
+
+// ── Chargement (fichier JSON ou données de démo) ──────────
+
+async function loadTeams() {
+  try {
+    const r = await fetch("teams.json");
+    if (!r.ok) throw new Error();
+    const json = await r.json();
+    TEAMS_DATA = json.teams || [];
+  } catch {
+    // Données de démo si teams.json absent
+    TEAMS_DATA = [
+      { name:"Wolves Esport",   points:320, tier:"S", logo:"", annee:"2023", nationalite:"🇫🇷 France",
+        players:[{name:"TyLuffy",chibi:""},{name:"Kira",chibi:""},{name:"Zer0",chibi:""}] },
+      { name:"Phoenix Squad",   points:210, tier:"A", logo:"", annee:"2024", nationalite:"🇧🇪 Belgique",
+        players:[{name:"Blaze",chibi:""},{name:"Nova",chibi:""}] },
+      { name:"Shadow Kings",    points:175, tier:"B", logo:"", annee:"2022", nationalite:"🇫🇷 France",
+        players:[{name:"Ghost",chibi:""},{name:"Ash",chibi:""},{name:"Volt",chibi:""}] },
+      { name:"Stormbreakers",   points:120, tier:"C", logo:"", annee:"2025", nationalite:"🇨🇭 Suisse",
+        players:[{name:"Rex",chibi:""}] },
+      { name:"Iron Titans",     points: 60, tier:"D", logo:"", annee:"2024", nationalite:"🇫🇷 France",
+        players:[] },
+      { name:"Rising Stars",    points: 15, tier:"E", logo:"", annee:"2026", nationalite:"🇫🇷 France",
+        players:[] },
+    ];
+  }
+  renderLeaderboard();
+}
+
+// ── Rendu du classement ───────────────────────────────────
+
+function renderLeaderboard() {
+  const sorted = [...TEAMS_DATA].sort((a,b) => b.points - a.points);
+  const lb = document.getElementById("leaderboard");
+
+  document.getElementById("team-count").textContent = `${sorted.length} équipe${sorted.length>1?"s":""}`;
+  document.getElementById("last-update").textContent =
+    "Mis à jour le " + new Date().toLocaleDateString("fr-FR",{day:"2-digit",month:"long",year:"numeric"});
+
+  if (!sorted.length) {
+    lb.innerHTML = `<div class="empty"><div class="icon">🏆</div><p>Aucune équipe pour le moment.</p></div>`;
+    return;
+  }
+
+  lb.innerHTML = sorted.map((team, i) => {
+    const rank  = i + 1;
+    const medal = rank <= 3 ? MEDAL[rank-1] : null;
+    const cls   = rank===1?"top1":rank===2?"top2":rank===3?"top3":"";
+    const tc    = TIER_COLOR[team.tier] || TIER_COLOR.E;
+    const logo  = team.logo
+      ? `<img src="${escHtml(team.logo)}" alt="${escHtml(team.name)}" onerror="this.style.display='none';this.parentElement.textContent='⚡'"/>`
+      : "⚡";
+
+    return `
+    <div class="team-row ${cls}" style="--tier-color:${tc}" onclick="openModal(${i})">
+      <div class="rank-num ${medal?'medal':''}">${medal || rank}</div>
+      <div class="team-logo">${logo}</div>
+      <div class="team-info">
+        <h3>${escHtml(team.name)}</h3>
+        <p>${team.nationalite || ""} ${team.annee ? "· Fondée en "+team.annee : ""}</p>
+      </div>
+      <span class="tier-badge tier-${team.tier}">Tier ${team.tier}</span>
+      <div class="points-display">
+        <div class="pts">${team.points}</div>
+        <div class="label">points</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// ── Modal fiche équipe ────────────────────────────────────
+
+function openModal(index) {
+  const sorted = [...TEAMS_DATA].sort((a,b) => b.points - a.points);
+  const team   = sorted[index];
+  const rank   = index + 1;
+  const medal  = rank <= 3 ? MEDAL[rank-1] : `#${rank}`;
+  const tc     = TIER_COLOR[team.tier] || TIER_COLOR.E;
+  const logo   = team.logo
+    ? `<img src="${escHtml(team.logo)}" alt="" onerror="this.style.display='none';this.parentElement.textContent='⚡'"/>`
+    : "⚡";
+
+  const playersHtml = (team.players && team.players.length)
+    ? team.players.map(p => {
+        const chibi = p.chibi
+          ? `<img src="${escHtml(p.chibi)}" alt="" onerror="this.style.display='none';this.parentElement.textContent='🎮'"/>`
+          : "🎮";
+        return `<div class="player-card">
+          <div class="player-chibi">${chibi}</div>
+          <div class="player-name">${escHtml(p.name)}</div>
+        </div>`;
+      }).join("")
+    : "<p style='color:var(--sub);font-size:.85rem'>Aucun joueur renseigné</p>";
+
+  document.getElementById("modal-body").innerHTML = `
+    <div class="modal-header">
+      <div class="modal-logo" style="border-color:${tc}">${logo}</div>
+      <div class="modal-title">
+        <h2>${escHtml(team.name)}</h2>
+        <p>${medal} · <span class="tier-badge tier-${team.tier}" style="font-size:.75rem">Tier ${team.tier}</span></p>
+      </div>
+    </div>
+    <div class="info-grid">
+      <div class="info-card">
+        <label>Points</label>
+        <span style="color:var(--gold)">${team.points}</span>
+      </div>
+      <div class="info-card">
+        <label>Tier</label>
+        <span style="color:${tc}">Tier ${team.tier}</span>
+      </div>
+      <div class="info-card">
+        <label>Fondée en</label>
+        <span>${team.annee || "—"}</span>
+      </div>
+      <div class="info-card">
+        <label>Nationalité</label>
+        <span>${team.nationalite || "—"}</span>
+      </div>
+    </div>
+    <div class="players-section">
+      <h3>👾 Joueurs (${(team.players||[]).length})</h3>
+      <div class="players-grid">${playersHtml}</div>
+    </div>`;
+
+  document.getElementById("modal-overlay").classList.add("open");
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById("modal-overlay") || !e.target) {
+    document.getElementById("modal-overlay").classList.remove("open");
+  }
+}
+
+document.addEventListener("keydown", e => { if (e.key==="Escape") closeModal(); });
+
+function escHtml(s) {
+  return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+// ── Init ──────────────────────────────────────────────────
+loadTeams();
+</script>
+</body>
+</html>

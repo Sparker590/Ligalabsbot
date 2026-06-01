@@ -1,0 +1,19 @@
+{
+  "teams": [
+    {
+      "role_id": "ROLE_ID_ICI",
+      "name": "Nom de la Team",
+      "points": 0,
+      "tier": "E",
+      "logo": "https://lien-vers-logo.png",
+      "annee": "2024",
+      "nationalite": "🇫🇷 France",
+      "players": [
+        {
+          "name": "Pseudo du joueur",
+          "chibi": "https://lien-vers-chibi-genere.png"
+        }
+      ]
+    }
+  ]
+}
