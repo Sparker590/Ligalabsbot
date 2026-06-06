@@ -164,5 +164,8 @@ class TicketCog(commands.Cog):
             f"✅ Prompts chibi → {channel.mention}", ephemeral=True)
 
 
+
+
 async def setup(bot):
     await bot.add_cog(TicketCog(bot))
+

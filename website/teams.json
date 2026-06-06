@@ -1,18 +1,155 @@
 {
   "teams": [
     {
-      "role_id": "ROLE_ID_ICI",
-      "name": "Nom de la Team",
-      "points": 0,
-      "tier": "E",
-      "logo": "https://lien-vers-logo.png",
-      "annee": "2024",
-      "nationalite": "🇫🇷 France",
-      "players": [
-        {
-          "name": "Pseudo du joueur",
-          "chibi": "https://lien-vers-chibi-genere.png"
-        }
+      "name": "Only Good Player",
+      "points": 0, "tier": "E", "logo": "", "annee": "", "nationalite": "🇫🇷 France",
+      "rosters": [
+        {"name": "Roster EU", "tier": "E", "players": [
+          {"name":"OGP | Lids","chibi":""},{"name":"VV","chibi":""},{"name":"Lxxq","chibi":""}
+        ]},
+        {"name": "Roster FR", "tier": "E", "players": [
+          {"name":"Norcite","chibi":""},{"name":"Voxen","chibi":""},{"name":"Physic","chibi":""}
+        ]}
+      ]
+    },
+    {
+      "name": "MCS",
+      "points": 0, "tier": "E", "logo": "", "annee": "", "nationalite": "🇫🇷 France",
+      "rosters": [
+        {"name": "Roster A", "tier": "E", "players": [
+          {"name":"MCS | Sparker","chibi":""},{"name":"MCS | Sunstar","chibi":""},{"name":"TO_Amoxi","chibi":""}
+        ]},
+        {"name": "Roster B", "tier": "E", "players": [
+          {"name":"MCS | Sxnseii Farrox","chibi":""},{"name":"Dark_up","chibi":""}
+        ]}
+      ]
+    },
+    {
+      "name": "Antartic Esport",
+      "points": 0, "tier": "E", "logo": "", "annee": "", "nationalite": "🇫🇷 France",
+      "rosters": [
+        {"name": "Roster Principal", "tier": "E", "players": [
+          {"name":"Latrik","chibi":""},{"name":"SE | Soufiane","chibi":""},{"name":"Trity","chibi":""}
+        ]}
+      ]
+    },
+    {
+      "name": "Ascend Rosters",
+      "points": 0, "tier": "E", "logo": "", "annee": "", "nationalite": "🇫🇷 France",
+      "rosters": [
+        {"name": "Roster Principal", "tier": "E", "players": [
+          {"name":"ASC | Roda","chibi":""},{"name":"ASC | Xetoroy","chibi":""},{"name":"Just_Flemme","chibi":""}
+        ]}
+      ]
+    },
+    {
+      "name": "Yoake Esport",
+      "points": 0, "tier": "D", "logo": "", "annee": "", "nationalite": "🇫🇷 France",
+      "rosters": [
+        {"name": "Roster Principal", "tier": "D", "players": [
+          {"name":"mash","chibi":""},{"name":"Lunarblast","chibi":""},{"name":"Mwa","chibi":""}
+        ]}
+      ]
+    },
+    {
+      "name": "Monsters Stars",
+      "points": 0, "tier": "E", "logo": "", "annee": "", "nationalite": "🇫🇷 France",
+      "rosters": [
+        {"name": "Roster Principal", "tier": "E", "players": [
+          {"name":"MS | Loulou","chibi":""},{"name":"Taog","chibi":""}
+        ]}
+      ]
+    },
+    {
+      "name": "Team the Phenix",
+      "points": 0, "tier": "E", "logo": "", "annee": "", "nationalite": "🇫🇷 France",
+      "rosters": [
+        {"name": "Roster N1", "tier": "E", "players": [
+          {"name":"TTP | Peio","chibi":""},{"name":"Kami","chibi":""},{"name":"Thaito","chibi":""}
+        ]},
+        {"name": "Roster N2", "tier": "E", "players": [
+          {"name":"th","chibi":""},{"name":"Alex","chibi":""},{"name":"Viiper","chibi":""}
+        ]},
+        {"name": "Roster N3", "tier": "E", "players": [
+          {"name":"Restore","chibi":""},{"name":"Visco","chibi":""},{"name":"nhm","chibi":""}
+        ]}
+      ]
+    },
+    {
+      "name": "STORM GAMING E-SPORT",
+      "points": 0, "tier": "E", "logo": "", "annee": "", "nationalite": "🇫🇷 France",
+      "rosters": [
+        {"name": "STM 1", "tier": "E", "players": [
+          {"name":"STM | Estecraft","chibi":""},{"name":"CL4 | Track","chibi":""},{"name":"STM | IeJ","chibi":""}
+        ]},
+        {"name": "STM 2", "tier": "E", "players": [
+          {"name":"STM | mathlesprit","chibi":""},{"name":"STM | Demon","chibi":""},{"name":"STM | Little_Gu","chibi":""}
+        ]},
+        {"name": "STM 3", "tier": "E", "players": [
+          {"name":"STM | Lava","chibi":""},{"name":"STM | The-Ghost","chibi":""},{"name":"STM | Mikautadze","chibi":""}
+        ]},
+        {"name": "STM 4", "tier": "E", "players": [
+          {"name":"STM | Nanou","chibi":""},{"name":"STM | Macei1234","chibi":""},{"name":"STM | LOLO1234","chibi":""}
+        ]},
+        {"name": "STM 5", "tier": "E", "players": [
+          {"name":"STM | Hunter","chibi":""},{"name":"STM | Medenptitzgueg","chibi":""},{"name":"STM | XIII","chibi":""}
+        ]}
+      ]
+    },
+    {
+      "name": "Shadow E-Sport",
+      "points": 0, "tier": "E", "logo": "", "annee": "", "nationalite": "🇫🇷 France",
+      "rosters": [
+        {"name": "Roster N1", "tier": "E", "players": [
+          {"name":"Iatrix","chibi":""},{"name":"Davit","chibi":""},{"name":"Kesh","chibi":""}
+        ]},
+        {"name": "Roster N2", "tier": "E", "players": [
+          {"name":"hydro","chibi":""},{"name":"kaubry","chibi":""},{"name":"GuiGui","chibi":""}
+        ]},
+        {"name": "Roster N3", "tier": "E", "players": [
+          {"name":"Beamfarm","chibi":""},{"name":"roderic","chibi":""}
+        ]},
+        {"name": "Roster N4", "tier": "E", "players": []}
+      ]
+    },
+    {
+      "name": "Fire Skull",
+      "points": 0, "tier": "E", "logo": "", "annee": "", "nationalite": "🇫🇷 France",
+      "rosters": [
+        {"name": "Pro", "tier": "E", "players": [
+          {"name":"Xeno","chibi":""},{"name":"Leon","chibi":""},{"name":"Nohan","chibi":""}
+        ]},
+        {"name": "Academie", "tier": "E", "players": [
+          {"name":"ESN","chibi":""},{"name":"TyLuffy","chibi":""},{"name":"FireFly","chibi":""}
+        ]}
+      ]
+    },
+    {
+      "name": "Skill Issue",
+      "points": 0, "tier": "E", "logo": "", "annee": "", "nationalite": "🇫🇷🇧🇪 France/Belgique",
+      "rosters": [
+        {"name": "Roster 1", "tier": "E", "players": [
+          {"name":"iMaxxQu","chibi":""},{"name":"Xetoroy","chibi":""},{"name":"Nao Tomori","chibi":""}
+        ]},
+        {"name": "Roster 2", "tier": "E", "players": [
+          {"name":"Gabouzenta","chibi":""},{"name":"Kayzer","chibi":""},{"name":"Never","chibi":""}
+        ]}
+      ]
+    },
+    {
+      "name": "Artic Esport",
+      "points": 0, "tier": "E", "logo": "", "annee": "", "nationalite": "🇫🇷 France",
+      "rosters": [
+        {"name": "Roster 1", "tier": "E", "players": [
+          {"name":"Kyo T","chibi":""},{"name":"Emperor T","chibi":""},{"name":"Erko R","chibi":""}
+        ]}
+      ]
+    },
+    {
+      "name": "Skora Esport",
+      "points": 0, "tier": "E", "logo": "", "annee": "", "nationalite": "🇫🇷 France",
+      "rosters": [
+        {"name": "Roster Principal", "tier": "E", "players": []}
       ]
     }
   ]

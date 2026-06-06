@@ -5,23 +5,77 @@ import asyncio
 import database as db
 
 RANKS = [
-    ("🟦 Diamant 💎", "diamant"),
-    ("🟪 Mythique 👑", "mythique"),
+    ("🟦 Diamant 💎",    "diamant"),
+    ("🟪 Mythique 👑",   "mythique"),
     ("🟥 Légendaire 👿", "legendaire"),
-    ("🟧 Master ⭐", "master"),
-    ("🟩 Pro 🏆", "pro"),
+    ("🟧 Master ⭐",     "master"),
+    ("🟩 Pro 🏆",        "pro"),
 ]
 ANNEES = [str(y) for y in range(2022, 2027)]
 
-# Sessions en mémoire pour le flux multi-étapes
 sessions: dict[int, dict] = {}
 
+
+# ─── PANEL PERMANENT ──────────────────────────────────────
+
+class PanelInscriptionView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(
+        label="📋 Inscrire ma team",
+        style=discord.ButtonStyle.primary,
+        custom_id="lancer_inscription_labs")
+    async def lancer(self, interaction: discord.Interaction, btn: discord.ui.Button):
+        sessions[interaction.user.id] = {}
+        await interaction.response.send_message(
+            "📋 **Inscription d'une team** — Étape 1/7\nQuel est le **nom de la team** ?",
+            view=NomTeamView(interaction.client, interaction.user, interaction.channel),
+            ephemeral=True)
+
+
+# ─── COG ──────────────────────────────────────────────────
 
 class InscriptionCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        bot.add_view(PanelInscriptionView())
 
-    # ── Commande principale ────────────────────────────────
+    # ── Panel public ───────────────────────────────────────
+    @app_commands.command(
+        name="setup-inscription",
+        description="Affiche le panel d'inscription de team dans ce salon")
+    @app_commands.checks.has_permissions(manage_channels=True)
+    async def setup_panel(self, interaction: discord.Interaction):
+        embed = discord.Embed(
+            title="📋 Inscription LigaLabs",
+            description=(
+                "Clique sur le bouton pour inscrire ta team.\n\n"
+                "Le bot te posera 7 questions :\n"
+                "• Nom de la team\n"
+                "• Année de création\n"
+                "• Nombre de rosters & joueurs\n"
+                "• Niveau ranked moyen\n"
+                "• Owner de la team\n"
+                "• Logo (optionnel)"),
+            color=0x5865F2)
+        embed.set_footer(text="LigaLabs • Inscriptions")
+        await interaction.channel.send(embed=embed, view=PanelInscriptionView())
+        await interaction.response.send_message("✅ Panel inscription créé.", ephemeral=True)
+
+    # ── Salon d'annonces ───────────────────────────────────
+    @app_commands.command(
+        name="set-inscription-channel",
+        description="Salon où arrivent les fiches d'inscription des teams")
+    @app_commands.describe(channel="Salon de destination")
+    @app_commands.checks.has_permissions(manage_channels=True)
+    async def set_insc_ch(self, interaction: discord.Interaction,
+                          channel: discord.TextChannel):
+        db.set_cfg(interaction.guild_id, "inscription_channel", channel.id)
+        await interaction.response.send_message(
+            f"✅ Annonces inscriptions → {channel.mention}", ephemeral=True)
+
+    # ── Commande slash directe ─────────────────────────────
     @app_commands.command(name="inscription",
                           description="Inscrire une team à la LigaLabs")
     async def inscription(self, interaction: discord.Interaction):
@@ -31,7 +85,7 @@ class InscriptionCog(commands.Cog):
             view=NomTeamView(self.bot, interaction.user, interaction.channel),
             ephemeral=True)
 
-    # ── Commande interne appelée par ticket.py ─────────────
+    # ── Appelé par ticket.py ───────────────────────────────
     async def start_inscription(self, channel: discord.TextChannel,
                                 user: discord.Member):
         sessions[user.id] = {}
@@ -40,7 +94,7 @@ class InscriptionCog(commands.Cog):
             view=NomTeamView(self.bot, user, channel, ticket_mode=True))
 
 
-# ─── STEP 1 — Nom de la team (Modal) ──────────────────────
+# ─── STEP 1 — Nom ─────────────────────────────────────────
 
 class NomTeamModal(discord.ui.Modal, title="Nom de la team"):
     nom = discord.ui.TextInput(label="Nom de la team", placeholder="Ex: Wolves Esport",
@@ -83,11 +137,11 @@ class AnneeView(discord.ui.View):
         self.user = user
         self.channel = channel
         self.ticket_mode = ticket_mode
-        select = discord.ui.Select(
+        sel = discord.ui.Select(
             placeholder="Année de création...",
             options=[discord.SelectOption(label=a, value=a) for a in ANNEES])
-        select.callback = self.on_annee
-        self.add_item(select)
+        sel.callback = self.on_annee
+        self.add_item(sel)
 
     async def on_annee(self, interaction: discord.Interaction):
         sessions[self.user.id]["annee"] = interaction.data["values"][0]
@@ -96,7 +150,7 @@ class AnneeView(discord.ui.View):
             view=RostersView(self.bot, self.user, self.channel, self.ticket_mode))
 
 
-# ─── STEP 3 — Nombre de rosters ───────────────────────────
+# ─── STEP 3 — Rosters ─────────────────────────────────────
 
 class RostersView(discord.ui.View):
     def __init__(self, bot, user, channel, ticket_mode=False):
@@ -105,11 +159,11 @@ class RostersView(discord.ui.View):
         self.user = user
         self.channel = channel
         self.ticket_mode = ticket_mode
-        select = discord.ui.Select(
+        sel = discord.ui.Select(
             placeholder="Nombre de rosters (max 5)...",
             options=[discord.SelectOption(label=str(i), value=str(i)) for i in range(1, 6)])
-        select.callback = self.on_rosters
-        self.add_item(select)
+        sel.callback = self.on_rosters
+        self.add_item(sel)
 
     async def on_rosters(self, interaction: discord.Interaction):
         n = int(interaction.data["values"][0])
@@ -119,11 +173,12 @@ class RostersView(discord.ui.View):
         sessions[self.user.id]["current_player"] = 1
         sessions[self.user.id]["current_players"] = []
         await interaction.response.edit_message(
-            content=("✅ **" + str(n) + " roster(s)** — Étape 4/7\n"
-                     "**Roster 1** — Ping le joueur 1 en répondant dans ce salon\n"
+            content=(f"✅ **{n} roster(s)** — Étape 4/7\n"
+                     f"**Roster 1** — Ping le joueur 1 en répondant dans ce salon\n"
                      "(ou tape `fin` pour terminer ce roster)"),
             view=None)
-        await self._wait_players(interaction.channel if not self.ticket_mode else self.channel)
+        ch = interaction.channel if not self.ticket_mode else self.channel
+        await self._wait_players(ch)
 
     async def _wait_players(self, channel):
         user = self.user
@@ -131,7 +186,6 @@ class RostersView(discord.ui.View):
 
         while sess["current_roster"] <= sess["nb_rosters"]:
             r_num = sess["current_roster"]
-            p_num = sess["current_player"]
 
             def check(m):
                 return m.author.id == user.id and m.channel.id == channel.id
@@ -143,24 +197,23 @@ class RostersView(discord.ui.View):
                 return
 
             if msg.content.lower() == "fin" or not msg.mentions:
-                # Fin de ce roster
                 sess["rosters"].append(list(sess["current_players"]))
                 sess["current_players"] = []
                 sess["current_roster"] += 1
                 sess["current_player"] = 1
                 if sess["current_roster"] <= sess["nb_rosters"]:
-                    await channel.send(f"✅ Roster {r_num} enregistré ! "
-                                       f"**Roster {sess['current_roster']}** — Ping le joueur 1 :")
+                    await channel.send(
+                        f"✅ Roster {r_num} enregistré ! "
+                        f"**Roster {sess['current_roster']}** — Ping le joueur 1 :")
             else:
                 player = msg.mentions[0]
                 sess["current_players"].append(
                     {"id": str(player.id), "name": player.display_name})
                 sess["current_player"] += 1
-                await channel.send(f"✅ {player.display_name} ajouté — "
-                                   f"Ping le joueur {sess['current_player']} "
-                                   f"(ou tape `fin`) :")
+                await channel.send(
+                    f"✅ {player.display_name} ajouté — "
+                    f"Ping le joueur {sess['current_player']} (ou tape `fin`) :")
 
-        # Tous les rosters collectés → étape rank
         await channel.send(
             "✅ Rosters enregistrés ! — **Étape 5/7** Niveau ranked moyen ?",
             view=RankView(self.bot, user, channel, self.ticket_mode))
@@ -175,18 +228,19 @@ class RankView(discord.ui.View):
         self.user = user
         self.channel = channel
         self.ticket_mode = ticket_mode
-        select = discord.ui.Select(
+        sel = discord.ui.Select(
             placeholder="Niveau ranked...",
             options=[discord.SelectOption(label=label, value=val) for label, val in RANKS])
-        select.callback = self.on_rank
-        self.add_item(select)
+        sel.callback = self.on_rank
+        self.add_item(sel)
 
     async def on_rank(self, interaction: discord.Interaction):
         sessions[self.user.id]["rank"] = interaction.data["values"][0]
         await interaction.response.edit_message(
             content="✅ Niveau enregistré ! — **Étape 6/7** Ping l'**owner** de la team :",
             view=None)
-        await self._wait_owner(interaction.channel if not self.ticket_mode else self.channel)
+        ch = interaction.channel if not self.ticket_mode else self.channel
+        await self._wait_owner(ch)
 
     async def _wait_owner(self, channel):
         user = self.user
@@ -201,7 +255,7 @@ class RankView(discord.ui.View):
             return
 
         sessions[user.id]["owner"] = {
-            "id": str(msg.mentions[0].id),
+            "id":   str(msg.mentions[0].id),
             "name": msg.mentions[0].display_name
         }
         await channel.send(
@@ -223,15 +277,15 @@ class LogoView(discord.ui.View):
     async def oui(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.edit_message(
             content="📎 Envoie le logo en pièce jointe dans ce salon :", view=None)
-        await self._wait_logo(interaction.channel if not self.ticket_mode else self.channel)
+        ch = interaction.channel if not self.ticket_mode else self.channel
+        await self._wait_logo(ch)
 
     @discord.ui.button(label="❌ Non", style=discord.ButtonStyle.secondary)
     async def non(self, interaction: discord.Interaction, button: discord.ui.Button):
         sessions[self.user.id]["logo_url"] = None
         await interaction.response.edit_message(content="✅ Pas de logo.", view=None)
-        await envoyer_recap(self.bot, self.user,
-                            interaction.channel if not self.ticket_mode else self.channel,
-                            interaction.guild)
+        ch = interaction.channel if not self.ticket_mode else self.channel
+        await envoyer_recap(self.bot, self.user, ch, interaction.guild)
 
     async def _wait_logo(self, channel):
         user = self.user
@@ -253,16 +307,16 @@ class LogoView(discord.ui.View):
 # ─── RÉCAPITULATIF FINAL ──────────────────────────────────
 
 async def envoyer_recap(bot, user, channel, guild):
-    sess = sessions.get(user.id, {})
+    sess     = sessions.get(user.id, {})
     guild_id = str(guild.id)
-    ch_id = db.cfg(guild_id, "inscription_channel")
+    ch_id    = db.cfg(guild_id, "inscription_channel")
 
     embed = discord.Embed(title="📋 Nouvelle Inscription Team", color=0x5865F2)
-    embed.add_field(name="Team", value=sess.get("nom", "?"), inline=True)
-    embed.add_field(name="Année", value=sess.get("annee", "?"), inline=True)
-    embed.add_field(name="Owner", value=sess.get("owner", {}).get("name", "?"), inline=True)
-    embed.add_field(name="Rank moyen", value=sess.get("rank", "?"), inline=True)
-    embed.add_field(name="Nb rosters", value=str(sess.get("nb_rosters", 0)), inline=True)
+    embed.add_field(name="Team",      value=sess.get("nom",   "?"), inline=True)
+    embed.add_field(name="Année",     value=sess.get("annee", "?"), inline=True)
+    embed.add_field(name="Owner",     value=sess.get("owner", {}).get("name", "?"), inline=True)
+    embed.add_field(name="Rank moyen",value=sess.get("rank",  "?"), inline=True)
+    embed.add_field(name="Nb rosters",value=str(sess.get("nb_rosters", 0)), inline=True)
 
     for i, roster in enumerate(sess.get("rosters", []), 1):
         joueurs = ", ".join(p["name"] for p in roster) if roster else "Aucun"

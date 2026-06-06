@@ -356,5 +356,92 @@ class ClassementCog(commands.Cog):
             ephemeral=True)
 
 
+
+    @app_commands.command(name="reset-saison-ligalabs",
+                          description="[ADMIN] Efface tous les matchs de poule — fin de saison")
+    @app_commands.checks.has_permissions(administrator=True)
+    async def reset_saison(self, interaction: discord.Interaction):
+        db.reset_poule_season(interaction.guild_id)
+        await interaction.response.send_message(
+            "✅ Poule LigaLabs réinitialisée. Nouvelle saison prête.", ephemeral=True)
+
+    @app_commands.command(name="export-ligalabs",
+                          description="[ADMIN] Exporte la poule LigaLabs vers website/ligalabs.json")
+    @app_commands.checks.has_permissions(administrator=True)
+    async def export_ligalabs(self, interaction: discord.Interaction):
+        import json, os
+        await interaction.response.defer(ephemeral=True)
+        guild_id = str(interaction.guild_id)
+        guild    = interaction.guild
+        matches  = db.get_poule_matches(guild_id)
+
+        # Charger les rosters depuis teams.json
+        all_rosters = []
+        if os.path.exists("website/teams.json"):
+            with open("website/teams.json", encoding="utf-8") as f:
+                teams_data = json.load(f).get("teams", [])
+            for team in teams_data:
+                for roster in team.get("rosters", []):
+                    all_rosters.append({
+                        "team":    team["name"],
+                        "roster":  roster["name"],
+                        "logo":    team.get("logo", ""),
+                        "role_id": team.get("role_id", ""),
+                    })
+
+        total    = len(all_rosters)
+        required = max((total - 1) * 2, 0)
+        seuil60  = int(required * 0.6)
+
+        # Calculer stats par roster
+        stats = {}
+        for r in all_rosters:
+            key = f"{r['team']}||{r['roster']}"
+            stats[key] = {**r, "played": 0, "wins": 0, "losses": 0}
+
+        for m in matches:
+            t1_role = guild.get_role(int(m["team1_id"])) if m["team1_id"] else None
+            t2_role = guild.get_role(int(m["team2_id"])) if m["team2_id"] else None
+            t1_name = t1_role.name.lstrip("-").strip() if t1_role else m["team1_id"]
+            t2_name = t2_role.name.lstrip("-").strip() if t2_role else m["team2_id"]
+            k1 = f"{t1_name}||{m['roster1']}"
+            k2 = f"{t2_name}||{m['roster2']}"
+            for k, is_t1 in [(k1, True), (k2, False)]:
+                if k in stats:
+                    stats[k]["played"] += 1
+                    won = (m["winner_team_id"] == m["team1_id"]) == is_t1
+                    stats[k]["wins" if won else "losses"] += 1
+
+        standings = []
+        for s in stats.values():
+            pct = round(s["played"] / required * 100) if required > 0 else 0
+            standings.append({
+                "team":      s["team"],
+                "roster":    s["roster"],
+                "logo":      s["logo"],
+                "played":    s["played"],
+                "required":  required,
+                "wins":      s["wins"],
+                "losses":    s["losses"],
+                "pct":       pct,
+                "qualified": s["played"] == 0 or s["played"] >= seuil60,
+            })
+        standings.sort(key=lambda x: (-x["wins"], x["losses"], x["played"]))
+
+        output = {
+            "season":    "Saison 1",
+            "total_rosters":  total,
+            "required_per":   required,
+            "seuil_60pct":    seuil60,
+            "standings":      standings,
+            "match_count":    len(matches),
+        }
+        os.makedirs("website", exist_ok=True)
+        with open("website/ligalabs.json", "w", encoding="utf-8") as f:
+            json.dump(output, f, indent=2, ensure_ascii=False)
+        await interaction.followup.send(
+            f"✅ `website/ligalabs.json` exporté — {len(standings)} rosters, {len(matches)} matchs.",
+            ephemeral=True)
+
 async def setup(bot):
     await bot.add_cog(ClassementCog(bot))

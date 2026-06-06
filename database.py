@@ -116,3 +116,48 @@ def reset_result(channel_id):
                   (str(channel_id),))
 
 init()
+
+# ── LigaLabs Poule (saison) ───────────────────────────────
+
+def _init_poule():
+    with db() as c:
+        c.executescript("""
+        CREATE TABLE IF NOT EXISTS ligalabs_poule(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            guild_id TEXT,
+            team1_id TEXT, roster1 TEXT,
+            team2_id TEXT, roster2 TEXT,
+            winner_team_id TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        """)
+_init_poule()
+
+def add_poule_match(guild_id, team1_id, roster1, team2_id, roster2, winner_team_id):
+    with db() as c:
+        c.execute(
+            "INSERT INTO ligalabs_poule(guild_id,team1_id,roster1,team2_id,roster2,winner_team_id)"
+            " VALUES(?,?,?,?,?,?)",
+            (str(guild_id),str(team1_id),roster1,str(team2_id),roster2,str(winner_team_id)))
+
+def count_poule(guild_id, team1_id, roster1, team2_id, roster2):
+    with db() as c:
+        r = c.execute(
+            "SELECT COUNT(*) as cnt FROM ligalabs_poule WHERE guild_id=?"
+            " AND ((team1_id=? AND roster1=? AND team2_id=? AND roster2=?)"
+            "   OR (team1_id=? AND roster1=? AND team2_id=? AND roster2=?))",
+            (str(guild_id),
+             str(team1_id),roster1,str(team2_id),roster2,
+             str(team2_id),roster2,str(team1_id),roster1)).fetchone()
+    return r["cnt"] if r else 0
+
+def get_poule_matches(guild_id):
+    with db() as c:
+        rows = c.execute(
+            "SELECT * FROM ligalabs_poule WHERE guild_id=? ORDER BY created_at",
+            (str(guild_id),)).fetchall()
+    return [dict(r) for r in rows]
+
+def reset_poule_season(guild_id):
+    with db() as c:
+        c.execute("DELETE FROM ligalabs_poule WHERE guild_id=?", (str(guild_id),))
