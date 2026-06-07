@@ -328,6 +328,10 @@ async def poster_annonce(interaction, requester, team_role, jour, heure):
     if not channel:
         return await interaction.followup.send("⚠️ Salon introuvable.", ephemeral=True)
 
+    # Récupérer le rôle "Ping scrims" s'il existe
+    ping_role = discord.utils.get(interaction.guild.roles, name="Ping scrims")
+    ping_str  = ping_role.mention if ping_role else ""
+
     embed = discord.Embed(title="⚔️ Recherche de Scrim", color=0xF0B232)
     embed.description = (f"{requester.mention} **({team_role.mention})** souhaite scrim\n"
                          f"📅 **{jour}** à **{heure}**")
@@ -335,7 +339,8 @@ async def poster_annonce(interaction, requester, team_role, jour, heure):
     embed.add_field(name="Date", value=f"{jour} à {heure}", inline=True)
     embed.set_footer(text="Clique GO pour accepter • Salon privé créé automatiquement")
     view = GoView()
-    msg  = await channel.send(embed=embed, view=view)
+    msg  = await channel.send(content=ping_str if ping_str else None,
+                               embed=embed, view=view)
     db.store_scrim(msg.id, guild_id, requester.id, team_role.id, jour, heure)
 
 

@@ -105,6 +105,10 @@ async def _poster_tournoi(interaction: discord.Interaction, user: discord.Member
     gid     = str(guild.id)
     ch_id   = db.cfg(gid, "tournoi_channel")
 
+    # Récupérer le rôle "Ping tournois" s'il existe
+    ping_role = discord.utils.get(guild.roles, name="Ping tournois")
+    ping_str  = ping_role.mention if ping_role else ""
+
     embed = discord.Embed(title="🏆 Annonce de Tournoi", color=0xF0B232)
     embed.add_field(name="🏢 Organisateur", value=sess.get("orga", "?"), inline=False)
     embed.add_field(
@@ -121,7 +125,7 @@ async def _poster_tournoi(interaction: discord.Interaction, user: discord.Member
     if ch_id:
         target = guild.get_channel(int(ch_id))
         if target:
-            await target.send(embed=embed)
+            await target.send(content=ping_str if ping_str else None, embed=embed)
             await interaction.edit_original_response(
                 content=f"✅ **Tournoi annoncé dans {target.mention} !**")
             sessions.pop(user.id, None)
