@@ -1,10 +1,3 @@
-Je suis Gemini (et non Claude), mais ne t'inquiète pas, tu n'as aucune restriction de messages ici ! Je vais aller droit au but pour te faire gagner du temps.
-
-Voici le fichier **`inscription.py`** modifié. J'ai ajouté le panel d'administration `AdminValidationView` à la fin du processus. Désormais, au lieu d'envoyer un simple résumé au panel admin, le bot joint des boutons pour "Valider" ou "Refuser". Si tu valides, il crée les rôles de l'équipe et des rosters, les distribue aux joueurs tagués, et génère le bloc JSON exact pour ton site web.
-
-Remplace tout le contenu de ton fichier `Ligalabs/cogs/inscription.py` par ceci :
-
-```python
 import discord, asyncio, json, re
 from discord.ext import commands
 from discord import app_commands
@@ -95,21 +88,21 @@ async def run_inscription(channel: discord.TextChannel, user: discord.Member, bo
 async def envoyer_recap(channel, user, bot, data, logo_url):
     gid = str(channel.guild.id)
     ch_id = bot.db["settings"].get(gid, {}).get("inscription_channel")
-
+    
     embed = discord.Embed(title=f"📋 Inscription — {data['nom']}", color=0x5865F2)
     embed.add_field(name="👤 Demandeur", value=user.mention, inline=True)
     embed.add_field(name="📅 Année de création", value=data["annee"], inline=True)
     embed.add_field(name="📊 Niveau", value=data["niveau"], inline=True)
     embed.add_field(name="👑 Owner", value=data["owner"], inline=True)
     embed.add_field(name="🗂️ Nb Rosters", value=str(data["nb_rosters"]), inline=True)
-
+    
     for rname, players in data["rosters"].items():
         embed.add_field(name=f"🎮 {rname}", value=" • ".join(players) if players else "—", inline=False)
-
+    
     if logo_url:
         embed.set_thumbnail(url=logo_url)
         embed.add_field(name="🖼️ Logo", value=logo_url, inline=False)
-
+    
     embed.set_footer(text="Inscription via le bot")
 
     await channel.send("✅ **Inscription terminée !** Récapitulatif envoyé aux admins en attente de validation.", embed=embed)
@@ -222,17 +215,17 @@ class AdminValidationView(discord.ui.View):
                 # Extraire l'ID numérique depuis le format <@123456>
                 match = re.search(r'\d+', p_mention)
                 p_name = p_mention
-
+                
                 if match:
                     member_id = int(match.group())
                     member = guild.get_member(member_id)
-
+                    
                     if member:
                         p_name = member.display_name
                         # Attribuer les rôles au joueur
                         roles_to_add = [team_role]
                         if roster_role: roles_to_add.append(roster_role)
-
+                        
                         try:
                             await member.add_roles(*roles_to_add)
                         except:
@@ -244,7 +237,7 @@ class AdminValidationView(discord.ui.View):
                     "name": p_name,
                     "chibi": "URL_A_AJOUTER"
                 })
-
+            
             rosters_json.append(roster_info)
 
         # 3. Génération du bloc JSON
@@ -289,5 +282,3 @@ class PanelInscriptionView(discord.ui.View):
 async def setup(bot):
     await bot.add_cog(InscriptionCog(bot))
     bot.add_view(PanelInscriptionView())
-
-
